@@ -6,7 +6,7 @@
 
 <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
 <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
-<title>BACM-24</title>
+<title>Houston-25</title>
 
 </head>
 <style>
@@ -41,7 +41,6 @@ realtime = false
 
 
      <button id="realbutton" onclick="realtime = !realtime;
-     console.log(tim)
         if(!realtime){d3.select('#realbutton').text('realtime')
          zeitgewahlt(Math.round(tim) )
         }else{d3.select('#realbutton').text('stop')
@@ -64,8 +63,8 @@ realtime = false
        d3.select('#gu1').property('value','45')
        d3.select('#gu2').property('value','0')
        d3.select('#gu3').property('value','15')
-       zeitgewahlt(7*60)
-       tim = 7*60
+       zeitgewahlt(6*60+30)
+       tim = 6*60+30
        d3.select('#playbut').text('play')
        play = false
            ">reset</button>
@@ -84,7 +83,7 @@ realtime = false
 
 
                     <td>time: </td>
-                    <td><span id="uhr">07:00</span></td>
+                    <td><span id="uhr">06:30</span></td>
                 <td></td>
                     <td>guntime:</td>
                     <td><span id="gunuhr">00:00</span></td>
@@ -197,10 +196,12 @@ waypoints =[
 
 {    name:"Finish", coordinates:  coordinates.mara[coordinates.mara.length-1],icon:'url(./finish.png)'},
 {    name:"Start", coordinates: coordinates.mara[0],icon:'url(./start.png)'},
-{    name:"42 elite", coordinates:[0,0],icon:'url(./42.png)'},
+{    name:"mara elite", coordinates:[0,0],icon:'url(./42.png)'},
 
-{    name:"42 last", coordinates:[0,0],icon:'url(./42B.png)'},
+{    name:"mara last", coordinates:[0,0],icon:'url(./42B.png)'},
+{    name:"half elite", coordinates:[0,0],icon:'url(./21.png)'},
 
+{    name:"half last", coordinates:[0,0],icon:'url(./21B.png)'},
 
 
 
@@ -221,7 +222,6 @@ waypoints =[
 
 ]
 
-console.log(waypoints)
 
 
   colorScale ={ mara: d3.scaleLinear()
@@ -255,25 +255,24 @@ racenames={mara:"marathon",maraslow:"marathon diverted",half:"halfmarathon",tenk
            cutoff = {mara:18*60+15,maraslow:8*60+360+60,half:5*60+360+120,tenkm:5*60+360+90,fivekm:3*60+330+360,twofivekm:3*60+360+360}
 
 
-           tim =60*7
+           tim =60*6+30
 key= "delay"
 const value = localStorage.getItem(key);
 
 // Check if the value exists
-delay={mara:(7*60+30),half:(8*60+30)}
+delay={mara:(7*60-5),half:(7*60-5)}
 if (value !== null) {
 
-  delay = JSON.parse(value)
+//  delay = JSON.parse(value)
 
 } else {
-    delay={mara:(7*60+30),half:(8*60+30)}
+    delay={mara:(7*60-5),half:(7*60-5)}
     localStorage.setItem(key, JSON.stringify(delay));
 
 
 }
 
 
-tim =60*7
 d3.select('#maratimset').property("value",convertMinutesToTime(delay.mara))
 d3.select('#halftimset').property("value",convertMinutesToTime(delay.half))
 d3.select('#tenkmtimset').property("value",convertMinutesToTime(delay.tenkm))
@@ -341,16 +340,12 @@ initialise_map()
                                         
                                         let kk = Math.max(0,timr-delay[key]) 
                                         kkk =kk
-                                        console.log(delay)
-                                        console.log("kk : " + kk)
                                         if (kk<woist[key].length){
-                                            console.log("menge2 ")
                                     for(i=0;i<coordinates[key].length-1;i++){
                                        
                              
                                                 menge = woist[key][kk][i]
                           
-                            console.log(menge)
                                         strokec=0
                             stroke = Math.min(10,mengeScale(menge))
                             rad = Math.min(10, mengeScale(menge))
@@ -387,14 +382,17 @@ initialise_map()
                             map.getSource('circles'+key).setData(pointjsons[key])
                      
                             filast  = findIndices(woist.mara[kk])  
-                   
+                            halffilast= findIndices(woist.half[kk])
                         }
                           
                     //    temp = Math.round(Math.max(0,timr-delay.mara)*3.136)
          
                 if (filast[0] != 0 && timr < delay.mara+122) {markers[8].setLngLat(coordinates.mara[filast[0]+1])}else{markers[8].setLngLat([0,0])}
                         if (filast[1] != 0  ) {markers[9].setLngLat(coordinates.mara[filast[1]-1])}else{markers[9].setLngLat([0,0])}
-                        
+               
+                        if (halffilast[0] != 0 && timr < delay.half+122) {markers[10].setLngLat(coordinates.half[halffilast[0]+1])}else{markers[10].setLngLat([0,0])}
+                        if (halffilast[1] != 0  ) {markers[11].setLngLat(coordinates.mara[halffilast[1]-1])}else{markers[11].setLngLat([0,0])}
+               
     } 
  // button zum absoielen
                         
@@ -560,7 +558,6 @@ function initialise_map()  {
       closeOnClick: false
     });
         for (const key in coordinates) {
-            if(key=="twofivekm"){console.log("25 gemalt")}
                                                         map.addSource('line-segments'+key, {
                                                             "type": "geojson",
                                                             "data": linejsons[key]
@@ -625,7 +622,6 @@ function initialise_map()  {
 
 
 }
-console.log("an der stelle")
     // Add a source for the line
     map.addSource('line-source2', {
         'type': 'geojson',
@@ -682,7 +678,7 @@ markers =[]
 
 map.on('zoom', function() { d3.select('#gu3').property('value',Math.round(map.getZoom()*10)/10)
 toggleMarkers();
-if(map.getZoom()>13){console.log("wd")}
+if(map.getZoom()>13){}
 /*
 if(map.getZoom() >14){linesize = 8}else{linesize=3}
 for(i=0;i<linienliste.length;i++){
@@ -706,7 +702,6 @@ var coord_mm = [
 textMarkersData =[]
 for (u=1;u<27;u++){
     temp = Math.round(u*conv*0.04)/0.04
-console.log(temp)
     coord_mm.push(coordinates.mara[Math.round(temp/25)])
     textMarkersData.push({coordinates:coordinates.mara[Math.round(temp/25)],text: u +" miles"})
 }
